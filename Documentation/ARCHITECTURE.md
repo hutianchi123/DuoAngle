@@ -89,16 +89,9 @@ Do not leak Apple SDK-specific types throughout the UI; the real provider is the
 
 ## Display abstraction
 
-The display layer should isolate Duo-specific scene/display arrangement logic.
+Phase 2 uses `DuoDisplayManager` as a small SwiftUI presentation boundary. It hosts the single measurement view as the primary content of an `ArrangementView` with the public `.overlay` style and an empty secondary view. SwiftUI responds to the available scene geometry and fold division; the app does not derive a display side from hinge degrees or maintain a second layout state machine. `MainView` still owns measurement and Debug diagnostics independently of this boundary.
 
-Responsibilities:
-
-- observe public display/scene state
-- determine the currently appropriate presentation region
-- react to folding transitions
-- expose a simple state to SwiftUI
-
-Do not attempt to defeat system blur with private APIs.
+The public SDK exposes division and occlusion reserved regions but no system blur or physical-display visibility state. Placement on a real Duo remains subject to hardware verification. Do not attempt to defeat system blur with private APIs.
 
 ## Target model
 

@@ -10,14 +10,15 @@ struct MainView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            Text(measurement.displayText)
-                .font(.system(size: measurement.snapshot.isAvailable ? 96 : 28, weight: .light))
-                .monospacedDigit()
-                .foregroundStyle(.white)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .padding(24)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            DuoDisplayManager.present {
+                Text(measurement.displayText)
+                    .font(.system(size: measurement.snapshot.isAvailable ? 96 : 28, weight: .light))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .padding(24)
+            }
 
             #if DEBUG
             VStack {
