@@ -1,5 +1,7 @@
 # Duo Angle
 
+An App for iPhone Duo
+
 Duo Angle is a minimalist hinge-angle measuring app for compatible iPhone Duo devices. It reads the system hinge measurement and presents the current angle in an adaptive SwiftUI interface.
 
 ## Features
