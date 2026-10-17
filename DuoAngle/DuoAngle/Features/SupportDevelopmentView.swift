@@ -122,11 +122,15 @@ struct SupportDevelopmentView: View {
                 .fontWeight(.semibold)
         case .productAvailable, .failed:
             if let price = manager.localizedPrice {
-                Text("♡ 支持开发 · \(price)")
-                    .fontWeight(.semibold)
+                Label {
+                    Text("支持开发 · \(price)")
+                        .fontWeight(.semibold)
+                } icon: {
+                    Image(systemName: "heart")
+                }
             }
         case .unavailable:
-            Text("♡ 支持开发")
+            Label("支持开发", systemImage: "heart")
                 .fontWeight(.semibold)
         }
     }
@@ -140,28 +144,28 @@ struct SupportDevelopmentView: View {
         }
     }
 
-    private var purchaseAccessibilityLabel: String {
+    private var purchaseAccessibilityLabel: Text {
         switch manager.state {
         case .productAvailable, .failed:
             if let price = manager.localizedPrice {
-                return "支持开发，价格 \(price)"
+                return Text("支持开发，价格 \(price)")
             }
-            return "支持开发"
+            return Text("支持开发")
         case .loadingProduct, .idle:
-            return "正在加载支持选项"
+            return Text("正在加载支持选项")
         case .purchasing:
-            return "正在处理购买"
+            return Text("正在处理购买")
         case .pending:
-            return "购买正在等待确认"
+            return Text("购买正在等待确认")
         case .succeeded:
-            return "感谢支持"
+            return Text("感谢支持")
         case .unavailable:
-            return "支持选项暂时不可用"
+            return Text("支持选项暂时不可用")
         }
     }
 
     private func statusText(_ text: String) -> some View {
-        Text(text)
+        Text(LocalizedStringKey(text))
             .font(.footnote)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)

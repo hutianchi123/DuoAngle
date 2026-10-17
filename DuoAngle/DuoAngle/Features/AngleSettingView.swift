@@ -81,7 +81,7 @@ struct AngleSettingView: View {
                         } header: {
                             Text("目标角度")
                         } footer: {
-                            Text("已启用 \(store.enabledTargets.count) 个目标角度")
+                            enabledTargetCountText
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -116,5 +116,10 @@ struct AngleSettingView: View {
                 Text("此操作会删除无法读取的原始目标角度数据。")
             }
         }
+    }
+
+    @ViewBuilder
+    private var enabledTargetCountText: some View {
+        Text("已启用 \(store.enabledTargets.count) 个目标角度")
     }
 }

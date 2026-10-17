@@ -17,9 +17,9 @@ final class HingeMeasurementManager {
     @ObservationIgnored private let logger = Logger(subsystem: "DuoAngle", category: "Hinge")
 
     var displayText: String {
-        if snapshot.status == .closed { return "请展开以测量角度" }
+        if snapshot.status == .closed { return String(localized: "请展开以测量角度") }
         guard snapshot.isAvailable, let degrees = snapshot.angleDegrees, degrees.isFinite else {
-            return "角度暂不可用"
+            return String(localized: "角度暂不可用")
         }
         return "\(Int(degrees.rounded()))°"
     }

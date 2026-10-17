@@ -111,7 +111,7 @@ final class SupportProductManager {
             }
         } catch {
             logger.error("Support purchase failed: \(String(describing: type(of: error)), privacy: .public)")
-            state = .failed(message: "购买未能完成，请稍后重试")
+            state = .failed(message: String(localized: "购买未能完成，请稍后重试"))
         }
     }
 
@@ -129,7 +129,7 @@ final class SupportProductManager {
         guard transaction.isVerified else {
             logger.error("Rejected an unverified support transaction")
             if presentsSuccess {
-                state = .failed(message: "购买无法验证，请稍后重试")
+                state = .failed(message: String(localized: "购买无法验证，请稍后重试"))
             }
             return
         }

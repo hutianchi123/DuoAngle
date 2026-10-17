@@ -18,47 +18,12 @@ struct MainView: View {
     @State private var destination: Destination?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    #if DEBUG
-    @State private var showsDiagnostics = false
-    @State private var hasActiveDivision = false
-    @State private var lastStatusChange: Date?
-    @State private var lastDivisionChange: Date?
-    #endif
-
     var body: some View {
         ZStack {
             Color(uiColor: .systemBackground).ignoresSafeArea()
             DuoDisplayManager.present {
                 angleReadout
             }
-
-            #if DEBUG
-            VStack {
-                Spacer()
-                if showsDiagnostics {
-                    MeasurementDebugView(
-                        measurement: measurement,
-                        hasActiveDivision: hasActiveDivision,
-                        lastStatusChange: lastStatusChange,
-                        lastDivisionChange: lastDivisionChange
-                    )
-                }
-                Button(showsDiagnostics ? "隐藏诊断" : "显示诊断") {
-                    showsDiagnostics.toggle()
-                }
-                .font(.caption)
-                .foregroundStyle(.primary)
-                .padding(12)
-            }
-            GeometryReader { geometry in
-                Color.clear
-                    .onChange(of: geometry.reservedRegions(kind: .division).contains(where: \.isActive), initial: true) { oldValue, newValue in
-                        if oldValue != newValue { lastDivisionChange = .now }
-                        hasActiveDivision = newValue
-                    }
-            }
-            .allowsHitTesting(false)
-            #endif
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomActionBar(
@@ -77,9 +42,6 @@ struct MainView: View {
         // The public SwiftUI hinge API is view-bound on iOS 27.1+.
         .onHingeChange(isEnabled: scenePhase == .active) { _, context in
             let (angle, status) = SwiftUIHingeAdapter.measurement(from: context)
-            #if DEBUG
-            if measurement.snapshot.status != status { lastStatusChange = .now }
-            #endif
             measurement.receive(angleRadians: angle, status: status)
             processMeasurement()
         }
@@ -145,11 +107,17 @@ struct MainView: View {
         }
     }
 
-    private var angleAccessibilityLabel: String {
-        let angle = measurement.snapshot.isAvailable
-            ? "当前角度，\(measurement.displayText.replacingOccurrences(of: "°", with: " 度"))"
-            : measurement.displayText
-        return targetFeedback.isVisible ? "\(angle)，已达到目标角度" : angle
+    private var angleAccessibilityLabel: Text {
+        guard measurement.snapshot.isAvailable,
+              let degrees = measurement.snapshot.angleDegrees,
+              degrees.isFinite else {
+            return Text(LocalizedStringKey(measurement.displayText))
+        }
+        let roundedDegrees = Int(degrees.rounded())
+        if targetFeedback.isVisible {
+            return Text("当前角度，\(roundedDegrees) 度，已达到目标角度")
+        }
+        return Text("当前角度，\(roundedDegrees) 度")
     }
 
     private func beginMonitoringIfNeeded() {

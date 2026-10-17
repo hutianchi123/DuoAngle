@@ -18,8 +18,8 @@ struct AddAngleView: View {
     }
 
     private var validationMessage: String? {
-        if !AngleTarget.validAngles.contains(selectedAngle) { return "角度必须在 0° 到 180° 之间。" }
-        if store.contains(selectedAngle, excluding: editing?.id) { return "这个目标角度已存在，请选择其他角度。" }
+        if !AngleTarget.validAngles.contains(selectedAngle) { return String(localized: "角度必须在 0° 到 180° 之间。") }
+        if store.contains(selectedAngle, excluding: editing?.id) { return String(localized: "这个目标角度已存在，请选择其他角度。") }
         return nil
     }
 
@@ -81,12 +81,12 @@ struct AddAngleView: View {
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 10) {
                     if let message = validationMessage ?? saveError {
-                        Text(message)
+                        Text(LocalizedStringKey(message))
                             .font(.footnote)
                             .foregroundStyle(.red)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityLabel("错误：\(message)")
+                            .accessibilityLabel(Text("错误：\(message)"))
                             .accessibilityIdentifier("angleValidationMessage")
                     }
 
@@ -119,7 +119,7 @@ struct AddAngleView: View {
             }
             dismiss()
         } catch {
-            saveError = "无法保存目标角度，请重试。"
+            saveError = String(localized: "无法保存目标角度，请重试。")
         }
     }
 }
