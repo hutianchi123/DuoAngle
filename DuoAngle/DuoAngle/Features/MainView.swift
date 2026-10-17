@@ -14,16 +14,19 @@ struct MainView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     #if DEBUG
     @State private var showsDiagnostics = false
+    @State private var hasActiveDivision = false
+    @State private var lastStatusChange: Date?
+    @State private var lastDivisionChange: Date?
     #endif
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(uiColor: .systemBackground).ignoresSafeArea()
             DuoDisplayManager.present {
                 Text(measurement.displayText)
                     .font(.system(size: measurement.snapshot.isAvailable ? 96 : 28, weight: .light))
                     .monospacedDigit()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                     .padding(24)
@@ -36,15 +39,28 @@ struct MainView: View {
             VStack {
                 Spacer()
                 if showsDiagnostics {
-                    MeasurementDebugView(measurement: measurement)
+                    MeasurementDebugView(
+                        measurement: measurement,
+                        hasActiveDivision: hasActiveDivision,
+                        lastStatusChange: lastStatusChange,
+                        lastDivisionChange: lastDivisionChange
+                    )
                 }
                 Button(showsDiagnostics ? "隐藏诊断" : "显示诊断") {
                     showsDiagnostics.toggle()
                 }
                 .font(.caption)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .padding(12)
             }
+            GeometryReader { geometry in
+                Color.clear
+                    .onChange(of: geometry.reservedRegions(kind: .division).contains(where: \.isActive), initial: true) { oldValue, newValue in
+                        if oldValue != newValue { lastDivisionChange = .now }
+                        hasActiveDivision = newValue
+                    }
+            }
+            .allowsHitTesting(false)
             #endif
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -64,6 +80,9 @@ struct MainView: View {
         // The public SwiftUI hinge API is view-bound on iOS 27.1+.
         .onHingeChange(isEnabled: scenePhase == .active) { _, context in
             let (angle, status) = SwiftUIHingeAdapter.measurement(from: context)
+            #if DEBUG
+            if measurement.snapshot.status != status { lastStatusChange = .now }
+            #endif
             measurement.receive(angleRadians: angle, status: status)
         }
         .onChange(of: scenePhase) { _, phase in

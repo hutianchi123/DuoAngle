@@ -19,7 +19,7 @@ struct BottomActionBar: View {
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .background(Color.black)
+        .background(Color(uiColor: .systemBackground))
     }
 
     private var angleButton: some View {
@@ -28,7 +28,7 @@ struct BottomActionBar: View {
                 .frame(minWidth: 120, minHeight: 44)
         }
         .buttonStyle(.glass)
-        .tint(.white)
+        .tint(Color.primary)
         .accessibilityLabel("设定角度")
     }
 
@@ -38,7 +38,7 @@ struct BottomActionBar: View {
                 .frame(minWidth: 120, minHeight: 44)
         }
         .buttonStyle(.glass)
-        .tint(.white)
+        .tint(Color.primary)
         .accessibilityLabel("支持开发")
     }
 }

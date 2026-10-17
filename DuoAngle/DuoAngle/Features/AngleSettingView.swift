@@ -7,7 +7,7 @@ struct AngleSettingView: View {
         NavigationStack {
             ContentUnavailableView("暂无目标角度", systemImage: "angle")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black)
+                .background(Color(uiColor: .systemBackground))
                 .navigationTitle("设定角度")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -16,6 +16,5 @@ struct AngleSettingView: View {
                     }
                 }
         }
-        .preferredColorScheme(.dark)
     }
 }
