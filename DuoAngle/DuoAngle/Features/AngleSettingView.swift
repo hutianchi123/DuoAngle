@@ -40,9 +40,7 @@ struct AngleSettingView: View {
                     ContentUnavailableView {
                         Label("暂无目标角度", systemImage: "angle")
                     } description: {
-                        Text("添加一个角度，稍后便可在测量时获得提醒。")
-                    } actions: {
-                        Button("添加角度") { editor = .add }
+                        Text("点击右上角 + 添加目标角度")
                     }
                 } else {
                     List {

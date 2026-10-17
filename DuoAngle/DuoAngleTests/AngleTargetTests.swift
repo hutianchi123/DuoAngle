@@ -72,16 +72,58 @@ struct AngleTargetTests {
         #expect(suite.string(forKey: AngleTargetStore.storageKey) == "unexpected")
     }
 
-    @Test func currentAngleUsesFreshValidMeasurement() {
+    @Test func stationaryCurrentAngleRemainsEligible() {
         let now = Date()
         let snapshot = HingeMeasurementSnapshot(
             angleRadians: AngleMath.radians(fromDegrees: 119.6),
             status: .partiallyOpen, timestamp: now, isAvailable: true
         )
-        #expect(CurrentAngleSelection.angle(from: snapshot, lastUpdate: now, now: now) == 120)
-        #expect(CurrentAngleSelection.angle(from: snapshot, lastUpdate: now.addingTimeInterval(-5), now: now) == 120)
-        #expect(CurrentAngleSelection.angle(from: snapshot, lastUpdate: now.addingTimeInterval(-20), now: now) == nil)
+        #expect(CurrentAngleSelection.angle(from: snapshot) == 120)
+        let stationary = HingeMeasurementSnapshot(
+            angleRadians: snapshot.angleRadians, status: snapshot.status,
+            timestamp: now.addingTimeInterval(-30), isAvailable: snapshot.isAvailable
+        )
+        #expect(CurrentAngleSelection.angle(from: stationary) == 120)
+    }
+
+    @Test func currentAngleRejectsInvalidStatesAndAngles() {
+        let now = Date()
         let closed = HingeMeasurementSnapshot(angleRadians: nil, status: .closed, timestamp: now, isAvailable: false)
-        #expect(CurrentAngleSelection.angle(from: closed, lastUpdate: now, now: now) == nil)
+        #expect(CurrentAngleSelection.angle(from: closed) == nil)
+        let unknown = HingeMeasurementSnapshot(angleRadians: .pi / 2, status: .unknown, timestamp: now, isAvailable: true)
+        #expect(CurrentAngleSelection.angle(from: unknown) == nil)
+        let missing = HingeMeasurementSnapshot(angleRadians: nil, status: .partiallyOpen, timestamp: now, isAvailable: false)
+        #expect(CurrentAngleSelection.angle(from: missing) == nil)
+        let unavailable = HingeMeasurementSnapshot(angleRadians: .pi / 2, status: .partiallyOpen, timestamp: now, isAvailable: false)
+        #expect(CurrentAngleSelection.angle(from: unavailable) == nil)
+        for radians in [Double.nan, .infinity, AngleMath.radians(fromDegrees: -1), AngleMath.radians(fromDegrees: 181)] {
+            let invalid = HingeMeasurementSnapshot(angleRadians: radians, status: .partiallyOpen, timestamp: now, isAvailable: true)
+            #expect(CurrentAngleSelection.angle(from: invalid) == nil)
+        }
+        let fullyOpen = HingeMeasurementSnapshot(angleRadians: .pi, status: .fullyOpen, timestamp: now, isAvailable: true)
+        #expect(CurrentAngleSelection.angle(from: fullyOpen) == 180)
+    }
+
+    @Test func observationSessionMustReceiveANewMeasurementAfterInvalidation() {
+        let manager = HingeMeasurementManager()
+        manager.receive(angleRadians: .pi / 2, status: .partiallyOpen)
+        #expect(CurrentAngleSelection.angle(from: manager.snapshot) == 90)
+        manager.clear()
+        #expect(CurrentAngleSelection.angle(from: manager.snapshot) == nil)
+        #expect(CurrentAngleSelection.angle(from: manager.snapshot) == nil)
+        manager.receive(angleRadians: .pi, status: .fullyOpen)
+        #expect(CurrentAngleSelection.angle(from: manager.snapshot) == 180)
+    }
+
+    @Test func currentAngleStillUsesExistingDuplicateValidation() throws {
+        let store = AngleTargetStore(defaults: defaults())
+        _ = try store.add(128)
+        let snapshot = HingeMeasurementSnapshot(
+            angleRadians: AngleMath.radians(fromDegrees: 128),
+            status: .partiallyOpen, timestamp: Date(), isAvailable: true
+        )
+        let selectedAngle = try #require(CurrentAngleSelection.angle(from: snapshot))
+        #expect(store.contains(selectedAngle))
+        #expect(throws: AngleTargetStore.Error.duplicateAngle) { try store.add(selectedAngle) }
     }
 }

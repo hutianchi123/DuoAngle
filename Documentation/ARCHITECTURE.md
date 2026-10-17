@@ -107,7 +107,7 @@ struct AngleTarget: Identifiable, Codable, Hashable {
 
 `DuoAngleApp` owns one observable `AngleTargetStore` and passes it through `MainView` to the target-management sheet. The store serializes `[AngleTarget]` with `Codable` into UserDefaults, validates loaded data, and exposes sorted `targets` plus `enabledTargets` for Phase 5. A corrupt payload is preserved and blocks writes until the user explicitly confirms recovery.
 
-`CurrentAngleSelection` consumes the existing measurement snapshot and latest callback time. It converts with `AngleMath`, rounds to an integer, and refuses closed, unknown, unavailable, invalid, or stale readings. The wheel editor owns a separate selection state and never changes the measurement pipeline.
+`CurrentAngleSelection` consumes the existing measurement snapshot. It converts with `AngleMath`, rounds to an integer, and accepts only available, finite `0...180°` readings in a partially or fully open state. A stationary reading does not expire by age. `MainView` clears the shared `HingeMeasurementManager` when its scene becomes inactive or its view disappears, so a new observation context needs a new valid callback before the shortcut is available. The wheel editor owns a separate selection state and never changes the measurement pipeline.
 
 ## Target monitor (Phase 5, not yet implemented)
 

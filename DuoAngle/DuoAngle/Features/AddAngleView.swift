@@ -44,29 +44,20 @@ struct AddAngleView: View {
                 .frame(maxWidth: 320)
                 .accessibilityIdentifier("targetAngleWheel")
 
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    let current = CurrentAngleSelection.angle(
-                        from: measurement.snapshot,
-                        lastUpdate: measurement.lastUpdate,
-                        now: context.date
-                    )
-                    VStack(spacing: 4) {
-                        Button("使用当前角度") {
-                            if let current = CurrentAngleSelection.angle(
-                                from: measurement.snapshot,
-                                lastUpdate: measurement.lastUpdate
-                            ) {
-                                selectedAngle = current
-                            }
+                let current = CurrentAngleSelection.angle(from: measurement.snapshot)
+                VStack(spacing: 4) {
+                    Button("使用当前角度") {
+                        if let current = CurrentAngleSelection.angle(from: measurement.snapshot) {
+                            selectedAngle = current
                         }
-                        .disabled(current == nil)
-                        .accessibilityHint(current == nil ? "当前角度不可用，请使用滚轮选择" : "将当前铰链角度复制到滚轮")
+                    }
+                    .disabled(current == nil)
+                    .accessibilityHint(current == nil ? "当前角度不可用，请使用滚轮选择" : "将当前铰链角度复制到滚轮")
 
-                        if current == nil {
-                            Text("当前角度不可用")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
+                    if current == nil {
+                        Text("当前角度不可用")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
                 }
 
