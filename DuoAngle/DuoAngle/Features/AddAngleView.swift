@@ -63,7 +63,6 @@ struct AddAngleView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
@@ -94,13 +93,14 @@ struct AddAngleView: View {
                     Button(action: save) {
                         Text("保存")
                             .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .frame(minWidth: 140, minHeight: 44)
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.borderedProminent)
                     .tint(.accentColor)
                     .controlSize(.large)
                     .disabled(validationMessage != nil)
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(Color(uiColor: .systemBackground))

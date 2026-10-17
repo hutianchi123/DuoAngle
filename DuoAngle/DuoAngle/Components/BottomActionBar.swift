@@ -29,7 +29,8 @@ struct BottomActionBar: View {
 
     private var angleButton: some View {
         Button(action: onAngleSetting) {
-            Text("设定角度")
+            Label("设定角度", systemImage: "angle")
+                .labelStyle(.titleAndIcon)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(minWidth: 120, minHeight: 44)
@@ -41,7 +42,8 @@ struct BottomActionBar: View {
 
     private var supportButton: some View {
         Button(action: onSupportDevelopment) {
-            Text("支持开发")
+            Label("支持开发", systemImage: "heart")
+                .labelStyle(.titleAndIcon)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(minWidth: 120, minHeight: 44)
