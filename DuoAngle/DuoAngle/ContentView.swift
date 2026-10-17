@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var targets = AngleTargetStore()
+
     var body: some View {
-        MainView()
+        MainView(targets: targets)
     }
 }

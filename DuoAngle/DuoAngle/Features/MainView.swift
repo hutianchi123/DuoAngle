@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MainView: View {
+    let targets: AngleTargetStore
     private enum Destination: String, Identifiable {
         case angleSetting
         case supportDevelopment
@@ -72,7 +73,7 @@ struct MainView: View {
         .sheet(item: $destination) { selected in
             switch selected {
             case .angleSetting:
-                AngleSettingView()
+                AngleSettingView(store: targets, measurement: measurement)
             case .supportDevelopment:
                 SupportDevelopmentView()
             }

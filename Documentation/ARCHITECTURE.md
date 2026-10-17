@@ -93,21 +93,23 @@ Phase 2 uses `DuoDisplayManager` as a small SwiftUI presentation boundary. It ho
 
 The public SDK exposes division and occlusion reserved regions but no system blur or physical-display visibility state. Placement on a real Duo remains subject to hardware verification. Do not attempt to defeat system blur with private APIs.
 
-## Target model
+## Target model and persistence (Phase 4)
 
-Conceptual model:
+The implemented model uses integer degrees and a centralized `0...180` valid range:
 
 ```swift
 struct AngleTarget: Identifiable, Codable, Hashable {
     let id: UUID
-    var angle: Double
+    var angle: Int
     var isEnabled: Bool
 }
 ```
 
-The exact implementation may use SwiftData, UserDefaults/AppStorage, or another lightweight persistence mechanism. Choose based on the target OS and project needs; do not add a database framework merely for complexity.
+`DuoAngleApp` owns one observable `AngleTargetStore` and passes it through `MainView` to the target-management sheet. The store serializes `[AngleTarget]` with `Codable` into UserDefaults, validates loaded data, and exposes sorted `targets` plus `enabledTargets` for Phase 5. A corrupt payload is preserved and blocks writes until the user explicitly confirms recovery.
 
-## Target monitor
+`CurrentAngleSelection` consumes the existing measurement snapshot and latest callback time. It converts with `AngleMath`, rounds to an integer, and refuses closed, unknown, unavailable, invalid, or stale readings. The wheel editor owns a separate selection state and never changes the measurement pipeline.
+
+## Target monitor (Phase 5, not yet implemented)
 
 The monitor receives live measurements and checks enabled targets.
 
