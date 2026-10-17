@@ -1,8 +1,17 @@
 import SwiftUI
 
 struct MainView: View {
+    private enum Destination: String, Identifiable {
+        case angleSetting
+        case supportDevelopment
+
+        var id: String { rawValue }
+    }
+
     @State private var measurement = HingeMeasurementManager()
+    @State private var destination: Destination?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     #if DEBUG
     @State private var showsDiagnostics = false
     #endif
@@ -18,6 +27,9 @@ struct MainView: View {
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                     .padding(24)
+                    .contentTransition(measurement.snapshot.isAvailable && !reduceMotion ? .numericText() : .identity)
+                    .animation(measurement.snapshot.isAvailable && !reduceMotion ? .linear(duration: 0.1) : nil, value: measurement.displayText)
+                    .accessibilityLabel(measurement.snapshot.isAvailable ? "当前角度，\(measurement.displayText.replacingOccurrences(of: "°", with: " 度"))" : measurement.displayText)
             }
 
             #if DEBUG
@@ -34,6 +46,20 @@ struct MainView: View {
                 .padding(12)
             }
             #endif
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomActionBar(
+                onAngleSetting: { destination = .angleSetting },
+                onSupportDevelopment: { destination = .supportDevelopment }
+            )
+        }
+        .sheet(item: $destination) { selected in
+            switch selected {
+            case .angleSetting:
+                AngleSettingView()
+            case .supportDevelopment:
+                SupportDevelopmentView()
+            }
         }
         // The public SwiftUI hinge API is view-bound on iOS 27.1+.
         .onHingeChange(isEnabled: scenePhase == .active) { _, context in
