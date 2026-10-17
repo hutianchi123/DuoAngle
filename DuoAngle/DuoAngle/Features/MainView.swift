@@ -10,6 +10,10 @@ struct MainView: View {
     }
 
     @State private var measurement = HingeMeasurementManager()
+    @State private var targetMonitor = TargetMonitor()
+    @State private var monitoringSessionID: UUID?
+    @State private var alertCoordinator = TargetAlertCoordinator(haptics: HapticManager())
+    @State private var targetFeedback = TargetReachedFeedbackState()
     @State private var destination: Destination?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -33,7 +37,18 @@ struct MainView: View {
                     .padding(24)
                     .contentTransition(measurement.snapshot.isAvailable && !reduceMotion ? .numericText() : .identity)
                     .animation(measurement.snapshot.isAvailable && !reduceMotion ? .linear(duration: 0.1) : nil, value: measurement.displayText)
-                    .accessibilityLabel(measurement.snapshot.isAvailable ? "当前角度，\(measurement.displayText.replacingOccurrences(of: "°", with: " 度"))" : measurement.displayText)
+                    .overlay(alignment: .trailing) {
+                        if targetFeedback.isVisible {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 26, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .offset(x: 40)
+                                .transition(reduceMotion ? .identity : .opacity)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: targetFeedback.isVisible)
+                    .accessibilityLabel(angleAccessibilityLabel)
             }
 
             #if DEBUG
@@ -85,10 +100,66 @@ struct MainView: View {
             if measurement.snapshot.status != status { lastStatusChange = .now }
             #endif
             measurement.receive(angleRadians: angle, status: status)
+            processMeasurement()
+        }
+        .onAppear { beginMonitoringIfNeeded() }
+        .onChange(of: targets.targets) { _, updatedTargets in
+            guard monitoringSessionID != nil else { return }
+            targetMonitor.synchronizeTargets(updatedTargets, baseline: measurement.snapshot)
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { measurement.clear() }
+            if phase == .active {
+                beginMonitoringIfNeeded()
+            } else {
+                stopMonitoring()
+                measurement.clear()
+            }
         }
-        .onDisappear { measurement.clear() }
+        .onDisappear {
+            stopMonitoring()
+            measurement.clear()
+        }
+        .task(id: targetFeedback.presentationID) {
+            guard targetFeedback.isVisible else { return }
+            let presentationID = targetFeedback.presentationID
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            targetFeedback.dismiss(ifPresentationID: presentationID)
+        }
+    }
+
+    private var angleAccessibilityLabel: String {
+        let angle = measurement.snapshot.isAvailable
+            ? "当前角度，\(measurement.displayText.replacingOccurrences(of: "°", with: " 度"))"
+            : measurement.displayText
+        return targetFeedback.isVisible ? "\(angle)，已达到目标角度" : angle
+    }
+
+    private func beginMonitoringIfNeeded() {
+        guard scenePhase == .active, monitoringSessionID == nil else { return }
+        let sessionID = UUID()
+        monitoringSessionID = sessionID
+        targetMonitor.beginSession(sessionID)
+    }
+
+    private func stopMonitoring() {
+        monitoringSessionID = nil
+        targetMonitor.endSession()
+        alertCoordinator.reset()
+        targetFeedback.reset()
+    }
+
+    private func processMeasurement() {
+        guard scenePhase == .active else { return }
+        beginMonitoringIfNeeded()
+        guard let sessionID = monitoringSessionID else { return }
+        let events = targetMonitor.process(
+            sample: measurement.snapshot,
+            targets: targets.enabledTargets,
+            sessionID: sessionID
+        )
+        if let selected = alertCoordinator.handle(events) {
+            targetFeedback.present(selected)
+        }
     }
 }

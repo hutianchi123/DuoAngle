@@ -109,41 +109,17 @@ struct AngleTarget: Identifiable, Codable, Hashable {
 
 `CurrentAngleSelection` consumes the existing measurement snapshot. It converts with `AngleMath`, rounds to an integer, and accepts only available, finite `0...180°` readings in a partially or fully open state. A stationary reading does not expire by age. `MainView` clears the shared `HingeMeasurementManager` when its scene becomes inactive or its view disappears, so a new observation context needs a new valid callback before the shortcut is available. The wheel editor owns a separate selection state and never changes the measurement pipeline.
 
-## Target monitor (Phase 5, not yet implemented)
+## Target monitor (Phase 5)
 
-The monitor receives live measurements and checks enabled targets.
+`TargetMonitor` is a UIKit- and SwiftUI-independent value-type state machine. `MainView` passes it the same precision-preserving `HingeMeasurementSnapshot` received by the existing `onHingeChange` pipeline plus the store's enabled targets and an observation-session UUID. It never observes the hinge itself.
 
-Responsibilities:
+Each target UUID owns an independent awaiting-baseline/armed/fired state. The centralized defaults are an inclusive ±1° hit tolerance, an inclusive ±3° re-arm distance, a provisional 0.35-second maximum crossing interval, and a provisional 12° maximum crossing displacement. The first valid sample of a session or changed target establishes state without emitting an event. Invalid, closed, unknown, inactive, and ended observations discard crossing continuity.
 
-1. Read current angle.
-2. Determine whether a target tolerance has been entered.
-3. Trigger HapticManager once.
-4. Track per-target armed/fired state.
-5. Re-arm after leaving the tolerance zone.
-
-Pseudo-flow:
-
-```text
-angle stream
-    ↓
-target monitor
-    ↓
-within tolerance?
-    ├── no → re-arm when appropriate
-    └── yes
-          ↓
-      already fired?
-       ├── yes → do nothing
-       └── no → haptic + mark fired
-```
+`TargetMonitor` emits logical `TargetReachedEvent` values only. `TargetAlertCoordinator` deterministically chooses at most one event per update by nearest measured angle and UUID tie-break, then applies a 0.5-second output cooldown without changing monitor state. `HapticManager` implements the injected `TargetHapticProviding` boundary with UIKit's public `UINotificationFeedbackGenerator` success feedback. The selected event also drives a cancellable, 0.5-second layout-neutral checkmark overlay in `MainView`.
 
 ## Haptics
 
-Use the appropriate public Apple haptic framework available to the target OS.
-
-The HapticManager should be independent of SwiftUI.
-
-The app must remain useful when haptic output is unavailable.
+`HapticManager` uses UIKit's public `UINotificationFeedbackGenerator.notificationOccurred(.success)` API behind a testable protocol. It is independent of SwiftUI and logical target state, and unsupported hardware simply produces no physical feedback while event processing and visual confirmation continue.
 
 ## StoreKit 2
 

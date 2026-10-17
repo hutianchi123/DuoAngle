@@ -1,13 +1,13 @@
 import Foundation
 
-enum HingeStatus: String, Equatable {
+nonisolated enum HingeStatus: String, Equatable, Sendable {
     case unknown
     case closed
     case partiallyOpen
     case fullyOpen
 }
 
-struct HingeMeasurementSnapshot: Equatable {
+nonisolated struct HingeMeasurementSnapshot: Equatable, Sendable {
     let angleRadians: Double?
     let status: HingeStatus
     let timestamp: Date

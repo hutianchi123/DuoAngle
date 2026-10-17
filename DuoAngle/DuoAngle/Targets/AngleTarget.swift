@@ -1,6 +1,6 @@
 import Foundation
 
-struct AngleTarget: Identifiable, Codable, Hashable {
+nonisolated struct AngleTarget: Identifiable, Codable, Hashable, Sendable {
     static let validAngles = 0...180
     static let defaultAngle = 90
 
