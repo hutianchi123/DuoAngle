@@ -25,54 +25,52 @@ struct AddAngleView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                Spacer(minLength: 12)
+            ScrollView {
+                VStack(spacing: 16) {
+                    Text("\(selectedAngle)°")
+                        .font(.system(size: 72, weight: .light, design: .rounded))
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
+                        .contentTransition(reduceMotion ? .identity : .numericText())
+                        .animation(reduceMotion ? nil : .linear(duration: 0.12), value: selectedAngle)
+                        .accessibilityLabel("选定角度，\(selectedAngle) 度")
 
-                Text("\(selectedAngle)°")
-                    .font(.system(size: 72, weight: .light, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(reduceMotion ? .identity : .numericText())
-                    .animation(reduceMotion ? nil : .linear(duration: 0.12), value: selectedAngle)
-                    .accessibilityLabel("选定角度，\(selectedAngle) 度")
-
-                Picker("目标角度", selection: $selectedAngle) {
-                    ForEach(AngleTarget.validAngles, id: \.self) { angle in
-                        Text("\(angle)°").tag(angle)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(maxWidth: 320)
-                .accessibilityIdentifier("targetAngleWheel")
-
-                let current = CurrentAngleSelection.angle(from: measurement.snapshot)
-                VStack(spacing: 4) {
-                    Button("使用当前角度") {
-                        if let current = CurrentAngleSelection.angle(from: measurement.snapshot) {
-                            selectedAngle = current
+                    Picker("目标角度", selection: $selectedAngle) {
+                        ForEach(AngleTarget.validAngles, id: \.self) { angle in
+                            Text("\(angle)°").tag(angle)
                         }
                     }
-                    .disabled(current == nil)
-                    .accessibilityHint(current == nil ? "当前角度不可用，请使用滚轮选择" : "将当前铰链角度复制到滚轮")
+                    .pickerStyle(.wheel)
+                    .frame(maxWidth: 320)
+                    .accessibilityIdentifier("targetAngleWheel")
 
-                    if current == nil {
-                        Text("当前角度不可用")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                    let current = CurrentAngleSelection.angle(from: measurement.snapshot)
+                    VStack(spacing: 4) {
+                        Button("使用当前角度") {
+                            if let current = CurrentAngleSelection.angle(from: measurement.snapshot) {
+                                selectedAngle = current
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .frame(minHeight: 44)
+                        .disabled(current == nil)
+                        .accessibilityHint(current == nil ? "当前角度不可用，请使用滚轮选择" : "将当前铰链角度复制到滚轮")
+
+                        if current == nil {
+                            Text("当前角度不可用")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
-                }
 
-                if let message = validationMessage ?? saveError {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .accessibilityIdentifier("angleValidationMessage")
                 }
-
-                Spacer(minLength: 12)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
             .background(Color(uiColor: .systemBackground))
             .navigationTitle(editing == nil ? "新增角度" : "编辑角度")
             .navigationBarTitleDisplayMode(.inline)
@@ -82,15 +80,32 @@ struct AddAngleView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                Button("保存") { save() }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
+                VStack(spacing: 10) {
+                    if let message = validationMessage ?? saveError {
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityLabel("错误：\(message)")
+                            .accessibilityIdentifier("angleValidationMessage")
+                    }
+
+                    Button(action: save) {
+                        Text("保存")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.accentColor)
                     .controlSize(.large)
                     .disabled(validationMessage != nil)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(.regularMaterial)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color(uiColor: .systemBackground))
             }
+            .onChange(of: selectedAngle) { _, _ in saveError = nil }
         }
     }
 

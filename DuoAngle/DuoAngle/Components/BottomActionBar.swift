@@ -6,13 +6,18 @@ struct BottomActionBar: View {
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                angleButton
-                supportButton
+            // The app targets iOS 27.1, so the iOS 26 Liquid Glass APIs are always available.
+            GlassEffectContainer(spacing: 12) {
+                HStack(spacing: 12) {
+                    angleButton
+                    supportButton
+                }
             }
-            VStack(spacing: 10) {
-                angleButton
-                supportButton
+            GlassEffectContainer(spacing: 10) {
+                VStack(spacing: 10) {
+                    angleButton
+                    supportButton
+                }
             }
         }
         .frame(maxWidth: .infinity)
@@ -24,7 +29,9 @@ struct BottomActionBar: View {
 
     private var angleButton: some View {
         Button(action: onAngleSetting) {
-            Label("设定角度", systemImage: "angle")
+            Text("设定角度")
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(minWidth: 120, minHeight: 44)
         }
         .buttonStyle(.glass)
@@ -34,7 +41,9 @@ struct BottomActionBar: View {
 
     private var supportButton: some View {
         Button(action: onSupportDevelopment) {
-            Label("支持开发", systemImage: "heart")
+            Text("支持开发")
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(minWidth: 120, minHeight: 44)
         }
         .buttonStyle(.glass)

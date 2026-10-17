@@ -29,27 +29,7 @@ struct MainView: View {
         ZStack {
             Color(uiColor: .systemBackground).ignoresSafeArea()
             DuoDisplayManager.present {
-                Text(measurement.displayText)
-                    .font(.system(size: measurement.snapshot.isAvailable ? 96 : 28, weight: .light))
-                    .monospacedDigit()
-                    .foregroundStyle(.primary)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                    .padding(24)
-                    .contentTransition(measurement.snapshot.isAvailable && !reduceMotion ? .numericText() : .identity)
-                    .animation(measurement.snapshot.isAvailable && !reduceMotion ? .linear(duration: 0.1) : nil, value: measurement.displayText)
-                    .overlay(alignment: .trailing) {
-                        if targetFeedback.isVisible {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 26, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .offset(x: 40)
-                                .transition(reduceMotion ? .identity : .opacity)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: targetFeedback.isVisible)
-                    .accessibilityLabel(angleAccessibilityLabel)
+                angleReadout
             }
 
             #if DEBUG
@@ -127,6 +107,41 @@ struct MainView: View {
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
             targetFeedback.dismiss(ifPresentationID: presentationID)
+        }
+    }
+
+    @ViewBuilder
+    private var angleReadout: some View {
+        if measurement.snapshot.isAvailable {
+            Text(measurement.displayText)
+                .font(.system(size: 96, weight: .light))
+                .monospacedDigit()
+                .foregroundStyle(.primary)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .padding(24)
+                .contentTransition(reduceMotion ? .identity : .numericText())
+                .animation(reduceMotion ? nil : .linear(duration: 0.1), value: measurement.displayText)
+                .overlay(alignment: .trailing) {
+                    if targetFeedback.isVisible {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 26, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .offset(x: 40)
+                            .transition(reduceMotion ? .identity : .opacity)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: targetFeedback.isVisible)
+                .accessibilityLabel(angleAccessibilityLabel)
+        } else {
+            Text(measurement.displayText)
+                .font(.title.weight(.light))
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(24)
+                .accessibilityLabel(angleAccessibilityLabel)
         }
     }
 

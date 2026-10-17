@@ -44,45 +44,49 @@ struct AngleSettingView: View {
                     }
                 } else {
                     List {
-                        ForEach(store.targets) { target in
-                            HStack {
-                                Button {
-                                    editor = .edit(target)
-                                } label: {
-                                    Text("\(target.angle)°")
-                                        .font(.title3.monospacedDigit())
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("编辑 \(target.angle) 度")
-
-                                Toggle("启用 \(target.angle) 度目标角度", isOn: Binding(
-                                    get: { target.isEnabled },
-                                    set: { newValue in try? store.setEnabled(newValue, for: target.id) }
-                                ))
-                                .labelsHidden()
-                                .accessibilityLabel("启用 \(target.angle) 度目标角度")
-                            }
-                            .accessibilityElement(children: .contain)
-                            .contextMenu {
-                                Button("删除目标角度", role: .destructive) {
-                                    try? store.delete(target.id)
-                                }
-                            }
-                        }
-                        .onDelete { offsets in
-                            let ids = offsets.map { store.targets[$0].id }
-                            for id in ids {
-                                try? store.delete(id)
-                            }
-                        }
                         Section {
+                            ForEach(store.targets) { target in
+                                HStack(alignment: .center, spacing: 12) {
+                                    Button {
+                                        editor = .edit(target)
+                                    } label: {
+                                        Text("\(target.angle)°")
+                                            .font(.title3.monospacedDigit())
+                                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("编辑 \(target.angle) 度")
+
+                                    Toggle("启用 \(target.angle) 度目标角度", isOn: Binding(
+                                        get: { target.isEnabled },
+                                        set: { newValue in try? store.setEnabled(newValue, for: target.id) }
+                                    ))
+                                    .labelsHidden()
+                                    .accessibilityLabel("启用 \(target.angle) 度目标角度")
+                                }
+                                .accessibilityElement(children: .contain)
+                                .contextMenu {
+                                    Button("删除目标角度", role: .destructive) {
+                                        try? store.delete(target.id)
+                                    }
+                                }
+                            }
+                            .onDelete { offsets in
+                                let ids = offsets.map { store.targets[$0].id }
+                                for id in ids {
+                                    try? store.delete(id)
+                                }
+                            }
+                        } header: {
+                            Text("目标角度")
+                        } footer: {
                             Text("已启用 \(store.enabledTargets.count) 个目标角度")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .listStyle(.insetGrouped)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

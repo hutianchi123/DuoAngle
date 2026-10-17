@@ -9,9 +9,10 @@ import XCTest
 
 final class DuoAngleUITests: XCTestCase {
 
-    private func isolatedApp() -> XCUIApplication {
+    private func isolatedApp(additionalLaunchArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments.append("-ui-testing-targets")
+        app.launchArguments.append(contentsOf: additionalLaunchArguments)
         return app
     }
 
@@ -100,8 +101,61 @@ final class DuoAngleUITests: XCTestCase {
         app.pickerWheels.firstMatch.adjust(toPickerWheelValue: "91°")
         app.buttons["保存"].tap()
         XCTAssertTrue(app.buttons["编辑 91 度"].waitForExistence(timeout: 5))
-        app.cells.firstMatch.swipeLeft()
+        guard let targetCell = app.cells.allElementsBoundByIndex.first(where: {
+            $0.buttons["编辑 91 度"].exists
+        }) else {
+            XCTFail("目标角度的列表行不存在")
+            return
+        }
+        targetCell.swipeLeft()
         app.buttons["Delete"].tap()
         XCTAssertTrue(app.staticTexts["暂无目标角度"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testAccessibilityTextSizeKeepsPrimaryActionsReachable() throws {
+        let app = isolatedApp(additionalLaunchArguments: [
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityExtraExtraLarge"
+        ])
+        app.launch()
+
+        let angleSettingButton = app.buttons["设定角度"]
+        XCTAssertTrue(angleSettingButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(angleSettingButton.isHittable)
+        angleSettingButton.tap()
+
+        let addButton = app.buttons["添加角度"]
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(addButton.isHittable)
+        addButton.tap()
+
+        let saveButton = app.buttons["保存"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(saveButton.isHittable)
+        saveButton.tap()
+        XCTAssertTrue(app.buttons["编辑 90 度"].waitForExistence(timeout: 5))
+        app.buttons["添加角度"].tap()
+
+        let validationMessage = app.staticTexts["angleValidationMessage"]
+        XCTAssertTrue(validationMessage.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(validationMessage.frame.height, 0)
+        XCTAssertLessThanOrEqual(validationMessage.frame.maxY, app.frame.maxY)
+
+        app.buttons["取消"].tap()
+        app.buttons["完成"].tap()
+
+        let supportButton = app.buttons["支持开发"]
+        XCTAssertTrue(supportButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(supportButton.isHittable)
+        supportButton.tap()
+
+        let purchaseButton = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "支持开发，价格")).firstMatch
+        XCTAssertTrue(purchaseButton.waitForExistence(timeout: 10))
+        let supportScrollView = app.scrollViews.firstMatch
+        if !purchaseButton.isHittable, supportScrollView.exists {
+            supportScrollView.swipeUp()
+        }
+        XCTAssertTrue(purchaseButton.isHittable)
     }
 }
