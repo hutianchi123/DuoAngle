@@ -121,25 +121,15 @@ Each target UUID owns an independent awaiting-baseline/armed/fired state. The ce
 
 `HapticManager` uses UIKit's public `UINotificationFeedbackGenerator.notificationOccurred(.success)` API behind a testable protocol. It is independent of SwiftUI and logical target state, and unsupported hardware simply produces no physical feedback while event processing and visual confirmation continue.
 
-## StoreKit 2
+## StoreKit 2 (Phase 6)
 
-StoreKit code should be isolated from the measurement system.
+`SupportProductManager` is the main-actor observable presentation boundary for the single consumable support product. It owns the explicit purchase state, localized product metadata, transaction de-duplication, unfinished-transaction processing, and the lifetime of the transaction-update listener. `SupportPurchaseServicing` isolates StoreKit from those state transitions and makes them testable without a network or real purchase.
 
-The measurement feature must never await StoreKit before becoming usable.
+`StoreKitSupportPurchaseService` is the only type that imports StoreKit. It caches the loaded `Product`, maps verified and unverified `VerificationResult<Transaction>` values into SDK-independent deliveries, retains only verified transactions for finishing, and exposes `Transaction.updates` as an `AsyncStream`. The stable product identifier is centralized as `com.TNTstudio.DuoAngle.support.coffee`.
 
-Purchase manager responsibilities:
+`DuoAngleApp` owns the manager independently of measurement, display, target, and haptic state. The root view starts unfinished/update processing, while `SupportDevelopmentView` requests product metadata only when opened. Product loading therefore never blocks the measurement interface. A purchase creates no entitlement, counter, feature gate, or restore action; after verified success and brief feedback, the same consumable can be purchased again.
 
-- load product
-- expose localized display price from StoreKit
-- initiate purchase
-- verify transaction
-- finish transaction
-- handle cancellation/pending/failure
-- observe transaction updates
-
-Never hard-code a localized currency display if StoreKit can provide the actual product price.
-
-The desired business price is ¥5, but App Store Connect price availability must be verified.
+The UI displays only `Product.displayPrice`; the desired CNY 5 price is a local test/App Store Connect configuration choice, not a hard-coded customer-facing price. `DuoAngle.storekit` is referenced by the shared development scheme from outside the synchronized app source group, so it is not copied into Debug or Release app bundles.
 
 ## State management
 

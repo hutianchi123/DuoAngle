@@ -9,8 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var targets = AngleTargetStore()
+    @State private var supportPurchases = SupportProductManager()
 
     var body: some View {
-        MainView(targets: targets)
+        MainView(targets: targets, supportPurchases: supportPurchases)
     }
 }

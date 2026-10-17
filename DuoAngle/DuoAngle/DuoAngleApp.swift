@@ -11,20 +11,31 @@ import SwiftUI
 @MainActor
 struct DuoAngleApp: App {
     @State private var targets: AngleTargetStore
+    @State private var supportPurchases: SupportProductManager
 
     init() {
-        if ProcessInfo.processInfo.arguments.contains("-ui-testing-targets"),
+        let isUITesting = ProcessInfo.processInfo.arguments.contains("-ui-testing-targets")
+        if isUITesting,
            let defaults = UserDefaults(suiteName: "DuoAngle.UITests") {
             defaults.removePersistentDomain(forName: "DuoAngle.UITests")
             _targets = State(initialValue: AngleTargetStore(defaults: defaults))
         } else {
             _targets = State(initialValue: AngleTargetStore())
         }
+        #if DEBUG
+        if isUITesting {
+            _supportPurchases = State(initialValue: SupportProductManager(service: UITestSupportPurchaseService()))
+        } else {
+            _supportPurchases = State(initialValue: SupportProductManager())
+        }
+        #else
+        _supportPurchases = State(initialValue: SupportProductManager())
+        #endif
     }
 
     var body: some Scene {
         WindowGroup {
-            MainView(targets: targets)
+            MainView(targets: targets, supportPurchases: supportPurchases)
         }
     }
 }

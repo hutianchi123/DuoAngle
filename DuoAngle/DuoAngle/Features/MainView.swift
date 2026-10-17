@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainView: View {
     let targets: AngleTargetStore
+    let supportPurchases: SupportProductManager
     private enum Destination: String, Identifiable {
         case angleSetting
         case supportDevelopment
@@ -90,7 +91,7 @@ struct MainView: View {
             case .angleSetting:
                 AngleSettingView(store: targets, measurement: measurement)
             case .supportDevelopment:
-                SupportDevelopmentView()
+                SupportDevelopmentView(manager: supportPurchases)
             }
         }
         // The public SwiftUI hinge API is view-bound on iOS 27.1+.
@@ -119,6 +120,7 @@ struct MainView: View {
             stopMonitoring()
             measurement.clear()
         }
+        .task { await supportPurchases.start() }
         .task(id: targetFeedback.presentationID) {
             guard targetFeedback.isVisible else { return }
             let presentationID = targetFeedback.presentationID

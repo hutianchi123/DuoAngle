@@ -1,0 +1,38 @@
+{
+  "identifier" : "7F80D429-5435-48B4-A649-C36AC7129F80",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "5",
+      "familyShareable" : false,
+      "internalID" : "F293477A-1C31-4384-B384-F6FD0B7B1265",
+      "localizations" : [
+        {
+          "description" : "自愿支持 Duo Angle 的独立开发，不会解锁额外功能。",
+          "displayName" : "支持开发",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "A voluntary contribution to support the independent development of Duo Angle.",
+          "displayName" : "Support Development",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.TNTstudio.DuoAngle.support.coffee",
+      "referenceName" : "Support Development",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0000000000",
+    "_developerTeamID" : "79W6NG56BQ",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "zh_CN",
+    "_storefront" : "CHN"
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

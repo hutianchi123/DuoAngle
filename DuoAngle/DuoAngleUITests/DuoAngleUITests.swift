@@ -55,7 +55,13 @@ final class DuoAngleUITests: XCTestCase {
         if !app.buttons["完成"].waitForExistence(timeout: 3) {
             app.buttons["支持开发"].tap()
         }
-        XCTAssertTrue(app.staticTexts["Duo Angle 是一款专为 iPhone Duo 打造的极简角度测量工具。感谢你支持独立开发！"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["为热爱，创造更多可能。"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Duo Angle 诞生于一个简单的想法：\n让每一次折叠，都成为一次测量。"].exists)
+        XCTAssertTrue(app.staticTexts["所有功能均可免费使用，\n支持完全出于自愿。"].exists)
+        let purchaseButton = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "支持开发，价格")).firstMatch
+        XCTAssertTrue(purchaseButton.waitForExistence(timeout: 10))
+        purchaseButton.tap()
+        XCTAssertTrue(app.buttons["感谢支持"].waitForExistence(timeout: 5))
         app.buttons["完成"].tap()
         XCTAssertTrue(app.buttons["设定角度"].waitForExistence(timeout: 5))
     }
