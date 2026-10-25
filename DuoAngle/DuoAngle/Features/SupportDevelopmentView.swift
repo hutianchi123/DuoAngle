@@ -31,6 +31,9 @@ struct SupportDevelopmentView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.top, 28)
+
+                    developerLinks
+                        .padding(.top, 36)
                 }
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity)
@@ -69,6 +72,56 @@ struct SupportDevelopmentView: View {
         .foregroundStyle(.primary)
         .multilineTextAlignment(.center)
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var developerLinks: some View {
+        VStack(spacing: 0) {
+            Link(destination: URL(string: "https://github.com/hutianchi123/DuoAngle")!) {
+                developerLinkLabel(
+                    symbol: "chevron.left.forwardslash.chevron.right",
+                    title: "GitHub",
+                    detail: "查看项目源码与更新"
+                )
+            }
+
+            Divider()
+
+            Link(destination: URL(string: "mailto:hutianchi3622@gmail.com")!) {
+                developerLinkLabel(
+                    symbol: "envelope",
+                    title: "联系开发者",
+                    detail: "hutianchi3622@gmail.com"
+                )
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private func developerLinkLabel(symbol: String, title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: symbol)
+                .font(.body)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.body)
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(systemName: "arrow.up.right")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+        }
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
     private var purchaseArea: some View {

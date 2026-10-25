@@ -68,6 +68,29 @@ final class DuoAngleUITests: XCTestCase {
     }
 
     @MainActor
+    func testDeveloperLinksReachableAndGitHubOpens() throws {
+        let app = isolatedApp()
+        app.launch()
+        app.buttons["支持开发"].tap()
+        if !app.buttons["完成"].waitForExistence(timeout: 3) {
+            app.buttons["支持开发"].tap()
+        }
+
+        let github = app.links.matching(NSPredicate(format: "label CONTAINS %@", "GitHub")).firstMatch
+        XCTAssertTrue(github.waitForExistence(timeout: 10))
+        if !github.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        XCTAssertTrue(github.isHittable)
+        github.tap()
+        XCTAssertTrue(XCUIApplication(bundleIdentifier: "com.apple.mobilesafari").waitForExistence(timeout: 10))
+
+        app.activate()
+        let email = app.links.matching(NSPredicate(format: "label CONTAINS %@", "hutianchi3622@gmail.com")).firstMatch
+        XCTAssertTrue(email.waitForExistence(timeout: 10))
+        if !email.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        XCTAssertTrue(email.isHittable)
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {

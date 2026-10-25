@@ -1,7 +1,7 @@
 # Duo Angle Privacy Policy
 
 **Effective date: 2026-10-17**
-**Contact: To be completed before release with a public developer contact email**
+**Contact: hutianchi3622@gmail.com**
 
 Duo Angle displays hinge angles on compatible devices and lets users manage target angles. This policy describes the app's information handling.
 
@@ -19,7 +19,7 @@ Based on the current code, Duo Angle does not upload measurements, target angles
 
 ## Children's privacy
 
-The app is not designed to collect personal information from children. A parent or guardian who believes a child provided personal information to the developer may contact the developer using the public email above (which must be completed before release).
+The app is not designed to collect personal information from children. A parent or guardian who believes a child provided personal information to the developer may contact the developer using the public email above.
 
 ## Policy updates
 
@@ -27,4 +27,4 @@ Updates will be reflected in this file with a revised effective date. Before App
 
 ## Contact
 
-Replace the contact placeholder with a verified public developer email before release.
+Email: [hutianchi3622@gmail.com](mailto:hutianchi3622@gmail.com).
