@@ -4,24 +4,62 @@ import XCTest
 
 final class DeviceCapabilityTests: XCTestCase {
     func testIPadIsExplicitlyUnsupported() {
-        assertCapability(.unsupported, for: .pad)
+        XCTAssertEqualCapability(.unsupported, DeviceCapabilityResolver.capability(
+            for: .pad,
+            machineIdentifier: "iPad13,4",
+            isSimulator: false
+        ))
     }
 
-    func testIPhoneWithoutCapabilitySignalRemainsUnknown() {
-        assertCapability(.unknown, for: .phone)
+    func testVerifiedIPhone14ProIsUnsupported() {
+        XCTAssertEqualCapability(.unsupported, DeviceCapabilityResolver.capability(
+            for: .phone,
+            machineIdentifier: "iPhone15,2",
+            isSimulator: false
+        ))
     }
 
-    private func assertCapability(
+    func testUnregisteredPhysicalIPhoneIsUnsupported() {
+        XCTAssertEqualCapability(.unsupported, DeviceCapabilityResolver.capability(
+            for: .phone,
+            machineIdentifier: "iPhone99,1",
+            isSimulator: false
+        ))
+    }
+
+    func testMissingPhysicalMachineIdentifierRemainsUnknown() {
+        XCTAssertEqualCapability(.unknown, DeviceCapabilityResolver.capability(
+            for: .phone,
+            machineIdentifier: nil,
+            isSimulator: false
+        ))
+    }
+
+    func testVerifiedIPhoneDuoSimulatorUsesSimulationPath() {
+        XCTAssertEqualCapability(.supported, DeviceCapabilityResolver.capability(
+            for: .phone,
+            machineIdentifier: "iPhone19,4",
+            isSimulator: true
+        ))
+    }
+
+    func testOtherPhoneSimulatorIsUnsupported() {
+        XCTAssertEqualCapability(.unsupported, DeviceCapabilityResolver.capability(
+            for: .phone,
+            machineIdentifier: "iPhone19,2",
+            isSimulator: true
+        ))
+    }
+
+    private func XCTAssertEqualCapability(
         _ expected: DeviceCapability,
-        for idiom: UIUserInterfaceIdiom,
+        _ actual: DeviceCapability,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        switch (expected, DeviceCapabilityResolver.capability(for: idiom)) {
-        case (.supported, .supported), (.unsupported, .unsupported), (.unknown, .unknown):
-            break
-        default:
-            XCTFail("Unexpected capability for interface idiom \(idiom)", file: file, line: line)
+        switch (expected, actual) {
+        case (.supported, .supported), (.unsupported, .unsupported), (.unknown, .unknown): break
+        default: XCTFail("Unexpected device capability", file: file, line: line)
         }
     }
 }

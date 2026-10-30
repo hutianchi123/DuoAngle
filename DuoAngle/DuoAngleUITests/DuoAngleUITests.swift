@@ -68,6 +68,49 @@ final class DuoAngleUITests: XCTestCase {
     }
 
     @MainActor
+    func testUnknownCompatibilityHidesMeasurementControls() throws {
+        let app = isolatedApp(additionalLaunchArguments: ["-foldmetry-device-capability", "unknown"])
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["尚未确认设备兼容性"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["有度尚未验证此 iPhone 机型。确认兼容性前，角度测量功能暂不可用。"].exists)
+        XCTAssertTrue(app.buttons["支持开发"].exists)
+        XCTAssertFalse(app.buttons["设定角度"].exists)
+    }
+
+    @MainActor
+    func testUnsupportedCompatibilityShowsAppleAndSupportActions() throws {
+        let app = isolatedApp(additionalLaunchArguments: ["-foldmetry-device-capability", "unsupported"])
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["此设备暂不支持"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["了解 iPhone Duo"].exists)
+        XCTAssertTrue(app.buttons["支持开发"].exists)
+        XCTAssertFalse(app.buttons["设定角度"].exists)
+    }
+
+    @MainActor
+    func testIPadWithoutOverrideUsesUnsupportedScreen() throws {
+        let app = isolatedApp()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["此设备暂不支持"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["了解 iPhone Duo"].exists)
+        XCTAssertTrue(app.buttons["支持开发"].exists)
+        XCTAssertFalse(app.buttons["设定角度"].exists)
+    }
+
+    @MainActor
+    func testSupportedCapabilityKeepsControlsWhenHingeSampleIsUnavailable() throws {
+        let app = isolatedApp(additionalLaunchArguments: ["-foldmetry-device-capability", "supported"])
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["角度暂不可用"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["设定角度"].exists)
+        XCTAssertFalse(app.staticTexts["此设备暂不支持"].exists)
+    }
+
+    @MainActor
     func testDeveloperLinksReachableAndGitHubOpens() throws {
         let app = isolatedApp()
         app.launch()

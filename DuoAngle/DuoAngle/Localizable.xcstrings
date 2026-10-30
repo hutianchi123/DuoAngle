@@ -675,6 +675,24 @@
         }
       }
     },
+    "尚未确认设备兼容性" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Device compatibility not confirmed" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "デバイスの互換性は未確認です" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "기기 호환성이 확인되지 않았습니다" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "尚未確認裝置相容性" } }
+      }
+    },
+    "有度尚未验证此 iPhone 机型。确认兼容性前，角度测量功能暂不可用。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "FoldMetry has not verified this iPhone model. Angle measurement is unavailable until compatibility is confirmed." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "この iPhone モデルは未検証です。互換性が確認されるまで角度測定は利用できません。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 iPhone 모델은 아직 검증되지 않았습니다. 호환성이 확인될 때까지 각도 측정을 사용할 수 없습니다." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "有度尚未驗證此 iPhone 機型，確認相容性前暫不提供角度測量。" } }
+      }
+    },
     "当前角度不可用" : {
       "extractionState" : "manual",
       "localizations" : {

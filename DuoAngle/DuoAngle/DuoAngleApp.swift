@@ -37,10 +37,12 @@ struct DuoAngleApp: App {
         WindowGroup {
             Group {
                 switch DeviceCapabilityResolver.debugOverride ?? DeviceCapabilityResolver.detected {
-                case .supported, .unknown:
+                case .supported:
                     MainView(targets: targets, supportPurchases: supportPurchases)
                 case .unsupported:
                     UnsupportedDeviceView(supportPurchases: supportPurchases)
+                case .unknown:
+                    CompatibilityUnconfirmedView(supportPurchases: supportPurchases)
                 }
             }
         }

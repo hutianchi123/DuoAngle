@@ -1,5 +1,20 @@
 # Phase 9 完成报告
 
+## Phase 9.2 — 实体 iPhone 兼容性识别
+
+- 根因是应用实际 `@main` 入口 `DuoAngleApp` 仍把 `.unknown` 送入 `MainView`；仅修改 `ContentView` 不会影响应用启动路由咩。
+- 通过公开 POSIX `sysctlbyname("hw.machine")` 读取实体硬件型号；连接中的实体 iPhone 14 Pro 经 Xcode 设备列表确认为 `iPhone15,2`，该标识未列入经实体验证的 Duo 支持清单，因此判为不支持咩。
+- iPad 继续通过 `userInterfaceIdiom == .pad` 识别为不支持；凡成功读取到型号标识但未列入实体 iPhone Duo 支持清单的设备均为 `.unsupported`，不显示角度测量操作；只有机型标识读取失败才保留 `.unknown` 中性页咩。
+- 模拟器只读取 `SIMULATOR_MODEL_IDENTIFIER`；连接的 iPhone Duo 模拟器产品标识为 `iPhone19,4`，该值仅用于模拟器测量通路，不作为实体 Duo 硬件标识咩。
+- 支持的物理 Duo 标识尚未从实体设备核实；当前实体 iPhone 支持清单为空，因此已识别的实体 Duo 也会落入 `.unsupported`，直到读取并登记真实 `hw.machine`；这是发布阻塞项，不能宣称实体 Duo 已支持咩。
+- XcodeBuildMCP 定向验证共 10 项通过：6 项 `DeviceCapabilityTests` 加 4 项兼容性 UI 测试，覆盖实体 iPhone 14 Pro 标识、未登记机型、缺失标识、iPad、Duo 模拟器、暂时无铰链样本、未知中性页及不支持页操作咩。
+- iPhone Duo 模拟器无覆盖运行时保留测量界面并显示 `180°`；本轮 Debug 和 Release 验证后均未关闭模拟器咩。
+- 本次未在实体 iPhone 14 Pro 上安装 Release 包验证屏幕；硬件型号已从当前连接的设备清单读取，但 Xcode MCP 物理设备交互不可用咩。
+- Apple 发布新 iPhone Duo 后，先从实体设备读取 `hw.machine` 并核实零售型号，再将该标识加入物理支持清单；其他可识别机型依照当前产品规则归为不支持，只有系统无法读取型号时进入中性未确认页咩。
+- XcodeBuildMCP 的 Release 模拟器构建成功；未登记为 Duo 的 Release iPhone 18 Pro 模拟器启动后显示不支持页，且无测量入口咩。
+- 无签名 iOS Release 设备目标构建成功，已编译到真实设备专用的 `sysctlbyname` 分支；该构建未安装到实体手机咩。
+- Release 包 `CFBundleIdentifier` 仍为 `com.hutianchi123.DuoAngle`，可执行文件未包含 `FOLDMETRY_DEVICE_CAPABILITY` 或 `foldmetry-device-capability` Debug 覆盖标记；StoreKit 配置文件未由本次改动触碰咩。
+
 ## 修复内容
 
 - 将应用默认显示名称设为 `FoldMetry`，并为 `zh-Hans`、`zh-Hant`、`en`、`ja`、`ko` 编译 `InfoPlist.strings` 本地化资源；简体与繁体中文显示“有度”，英文、日文、韩文显示“FoldMetry”咩。
@@ -31,6 +46,7 @@
 ## 截图
 
 - [iPhone 18 Pro 中文不支持页](Phase9Evidence/iphone18-unsupported-zh-Hans.jpg)咩。
+- [Phase 9.2 Release iPhone 模拟器不支持页](Phase9Evidence/iphone18-release-unsupported-zh-Hans.jpg)咩。
 - [iPad mini 浅色不支持页](Phase9Evidence/ipad-mini-unsupported-light.jpg)咩。
 - [iPad mini 深色不支持页](Phase9Evidence/ipad-mini-unsupported-dark.jpg)咩。
 

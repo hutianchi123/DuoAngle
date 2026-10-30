@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import UIKit
 
@@ -7,21 +8,58 @@ enum DeviceCapability {
     case unknown
 }
 
-/// UIHinge reports measurements, not a public hardware-capability query.
-/// Keep production detection unknown rather than infer capability from a missing sample.
 enum DeviceCapabilityResolver {
     static var detected: DeviceCapability {
-        capability(for: UIDevice.current.userInterfaceIdiom)
+        capability(
+            for: UIDevice.current.userInterfaceIdiom,
+            machineIdentifier: machineIdentifier,
+            isSimulator: isSimulator
+        )
     }
 
-    static func capability(for interfaceIdiom: UIUserInterfaceIdiom) -> DeviceCapability {
+    static func capability(
+        for interfaceIdiom: UIUserInterfaceIdiom,
+        machineIdentifier: String?,
+        isSimulator: Bool
+    ) -> DeviceCapability {
         if interfaceIdiom == .pad {
             return .unsupported
         }
+        guard interfaceIdiom == .phone else { return .unknown }
 
-        // UIHinge exposes measurements, not a public capability query.
-        // Keep iPhone detection conservative when no hinge sample is available.
-        return .unknown
+        if isSimulator {
+            guard let machineIdentifier else { return .unknown }
+            return machineIdentifier == "iPhone19,4" ? .supported : .unsupported
+        }
+
+        guard let machineIdentifier else { return .unknown }
+        return verifiedSupportedPhysicalIPhoneIdentifiers.contains(machineIdentifier)
+            ? .supported
+            : .unsupported
+    }
+
+    // Populate only from a real iPhone Duo's hw.machine output; never copy a
+    // simulator model identifier into this physical-device registry.
+    private static let verifiedSupportedPhysicalIPhoneIdentifiers: Set<String> = []
+
+    private static var machineIdentifier: String? {
+        #if targetEnvironment(simulator)
+        return ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"]
+        #else
+        var size = 0
+        guard sysctlbyname("hw.machine", nil, &size, nil, 0) == 0, size > 1 else { return nil }
+        var bytes = [CChar](repeating: 0, count: size)
+        guard sysctlbyname("hw.machine", &bytes, &size, nil, 0) == 0 else { return nil }
+        return String(cString: bytes)
+        #endif
+    }
+
+    private static var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        true
+        #else
+        false
+        #endif
     }
 
     #if DEBUG
