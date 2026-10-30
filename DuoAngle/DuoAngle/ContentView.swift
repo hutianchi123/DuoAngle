@@ -12,6 +12,13 @@ struct ContentView: View {
     @State private var supportPurchases = SupportProductManager()
 
     var body: some View {
-        MainView(targets: targets, supportPurchases: supportPurchases)
+        Group {
+            switch DeviceCapabilityResolver.debugOverride ?? DeviceCapabilityResolver.detected {
+            case .supported, .unknown:
+                MainView(targets: targets, supportPurchases: supportPurchases)
+            case .unsupported:
+                UnsupportedDeviceView(supportPurchases: supportPurchases)
+            }
+        }
     }
 }

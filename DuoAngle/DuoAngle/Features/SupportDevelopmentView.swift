@@ -64,7 +64,7 @@ struct SupportDevelopmentView: View {
 
     private var supportCopy: some View {
         VStack(spacing: 22) {
-            Text("Duo Angle 诞生于一个简单的想法：\n让每一次折叠，都成为一次测量。")
+            Text("有度诞生于一个简单的想法：\n让每一次折叠，都成为一次测量。")
             Text("如果你喜欢这款小工具，\n不妨请开发者喝杯咖啡。")
             Text("所有功能均可免费使用，\n支持完全出于自愿。")
         }

@@ -1,6 +1,6 @@
 [简体中文](README.md) | [English](README.en.md)
 
-# Duo Angle
+# 有度 / FoldMetry
 
 Duo Angle 是一款面向兼容 iPhone Duo 设备的铰链角度测量应用。它使用系统提供的铰链测量值，通过适配 Duo 布局的 SwiftUI 界面显示当前角度。
 
